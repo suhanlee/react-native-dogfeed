@@ -18,7 +18,7 @@ Successfully set up ios for react-native
 🎉  Successfully set up Sentry for your project 🎉
 ```
 ## Android
-## ios (CocosPods)
+## ios (with CocosPods)
 If you see message while building ios project like below
 ```
 #import "RNSentry.h" // This is used for versions of react < 0.40
@@ -42,4 +42,28 @@ update cocoapods and re-install it.
 ```
 $ pod repo update
 $ pod install
+```
+Sentry pod depends on React pod. so you need to configure `React` Pod.
+```
+ pod 'yoga', path: "#{rn_path}/ReactCommon/yoga/yoga.podspec"
+ pod 'React', path: rn_path, :subspecs => [
+    'Core',
+    'CxxBridge',
+    'DevSupport',
+    'RCTActionSheet',
+    'RCTAnimation',
+    'RCTGeolocation',
+    'RCTImage',
+    'RCTLinkingIOS',
+    'RCTNetwork',
+    'RCTSettings',
+    'RCTText',
+    'RCTVibration',
+    'RCTWebSocket',
+  ]
+```
+then try re install it.
+If you see runtime module error, also maybe It will need reset cache
+```
+$ yarn start --reset-cache
 ```
