@@ -4,13 +4,34 @@ This is my `dog-feeding` experiences.
 $ npm install react-native-sentry --save
 $ react-native link react-native-sentry
 ```
+after successfully linking it, you can see message such like below.
+```
+...
+Please open
+https://sentry.io/account/settings/wizard/[YOUR_URL]
+in your browser (if it's not open already)
+
+
+Successfully set up android for react-native
+Successfully set up ios for react-native
+
+🎉  Successfully set up Sentry for your project 🎉
+```
 ## Android
 ## ios (CocosPods)
+If you see message while building ios project like below
+```
+#import "RNSentry.h" // This is used for versions of react < 0.40
+        ^~~~~~~~~~~~
+1 error generated.
+```
+Maybe installing pod modules is failed.
+So you should install pod modules correctly.
 ```
 $ cd ios
 $ pod install
 ```
-If you see error message like below
+and If you see error message like below
 ```
 [!] CocoaPods could not find compatible versions for pod "Sentry":
   In Podfile:
