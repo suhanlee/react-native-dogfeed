@@ -1,0 +1,28 @@
+{
+  "name": "NumericKeyboardExam",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start --reset-cache",
+    "test": "jest",
+    "m": "adb shell input keyevent 82"
+  },
+  "dependencies": {
+    "native-base": "^2.4.5",
+    "react": "16.3.1",
+    "react-native": "0.55.4",
+    "react-native-autogrow-textinput": "^5.1.1",
+    "react-native-blur": "^3.2.2",
+    "react-native-keyboard": "^2.0.1",
+    "react-native-keyboard-input": "^5.2.3"
+  },
+  "devDependencies": {
+    "babel-jest": "22.4.4",
+    "babel-preset-react-native": "4.0.0",
+    "jest": "22.4.4",
+    "react-test-renderer": "16.3.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
