@@ -14,6 +14,8 @@ import {
   PixelRatio,
   Keyboard,
   TouchableOpacity,
+  Animated,
+  Dimensions,
   ScrollView, TouchableWithoutFeedback,
 } from 'react-native';
 
@@ -22,6 +24,7 @@ import {KeyboardAccessoryView, KeyboardUtils} from 'react-native-keyboard-input'
 import {AutoGrowingTextInput} from 'react-native-autogrow-textinput';
 import DismissKeyboardHOC from './DismissKeyboardHOC';
 import {Input} from 'native-base';
+import NumberKeyboard from './NumberKeyboard';
 
 const DismissKeyboardView = DismissKeyboardHOC(View);
 const IsIOS = Platform.OS === 'ios';
@@ -31,141 +34,69 @@ type Props = {};
 export default class App extends Component<Props> {
   constructor(props) {
     super(props);
-    this.keyboardAccessoryViewContent = this.keyboardAccessoryViewContent.bind(this);
-    this.onKeyboardItemSelected = this.onKeyboardItemSelected.bind(this);
-    this.onKeyboardResigned = this.onKeyboardResigned.bind(this);
-    this.resetKeyboardView = this.resetKeyboardView.bind(this);
-    this.onKeyboardResigned = this.onKeyboardResigned.bind(this);
-
-    this.state = {
-      customKeyboard: {
-        component: undefined,
-        initialProps: undefined,
-      },
-      receivedKeyboardData: undefined,
+    this.state ={
       text: '',
     };
+    this.keyboardHeight = new Animated.Value(0);
+    this.keyboardOpacity = new Animated.Value(0);
   }
 
-  resetKeyboardView() {
-    Keyboard.dismiss();
-    this.showKeyboardView('KeyboardView', 'FIRST - 1 (passed prop)')
-    // this.setState({customKeyboard: {}});
-  }
-
-  onKeyboardResigned() {
-    this.resetKeyboardView();
-  }
-
-  getToolbarButtons() {
-    return [
-      {
-        text: 'show1',
-        testID: 'show1',
-        onPress: () => this.showKeyboardView('KeyboardView', 'FIRST - 1 (passed prop)'),
-      },
-      {
-        text: 'show2',
-        testID: 'show2',
-        onPress: () => this.showKeyboardView('AnotherKeyboardView', 'SECOND - 2 (passed prop)'),
-      },
-      {
-        text: 'reset',
-        testID: 'reset',
-        onPress: () => this.resetKeyboardView(),
-      },
-    ];
-  }
-
-  showKeyboardView(component, title) {
+  _handleKey = (key) => {
     this.setState({
-      customKeyboard: {
-        component,
-        initialProps: {title},
-      },
-    });
-  }
+      text: key
+    })
+  };
+  onText = (text) => {
+    Animated.timing(
+      this.keyboardHeight,
+      {
+        toValue: 200,
+        duration: 500,
+      }
+    ).start();
 
-  keyboardAccessoryViewContent() {
-    const InnerContainerComponent = View;
-    return (
-      <InnerContainerComponent blurType="xlight" style={styles.blurContainer}>
-        <View style={{borderTopWidth: StyleSheet.hairlineWidth, borderColor: '#bbb'}}/>
+    Animated.timing(
+      this.keyboardOpacity,
+      {
+        toValue: 1,
+        duration: 0,
+      }
+    ).start();
+  };
+  onReleaseKeyboard = () => {
+    Animated.timing(
+      this.keyboardHeight,
+      {
+        toValue: 0,
+        duration: 500,
+      }
+    ).start();
+  };
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            maxHeight={200}
-            style={styles.textInput}
-            ref={(r) => {
-              this.textInputRef = r;
-            }}
-            placeholder={'Message'}
-            underlineColorAndroid="transparent"
-            onFocus={() => this.resetKeyboardView()}
-            testID={'input'}
-          />
-          <TouchableOpacity style={styles.sendButton} onPress={() => KeyboardUtils.dismiss()}>
-            <Text>Action</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{flexDirection: 'row'}}>
-          {
-            this.getToolbarButtons().map((button, index) =>
-              <TouchableOpacity onPress={button.onPress} style={{paddingLeft: 15, paddingBottom: 10}} key={index} testID={button.testID}>
-                <Text>{button.text}</Text>
-              </TouchableOpacity>)
-          }
-        </View>
-      </InnerContainerComponent>
-    );
-  }
-
-  onKeyboardItemSelected(keyboardId, params) {
-    const receivedKeyboardData = `onItemSelected from "${keyboardId}"\nreceived params: ${JSON.stringify(params)}`;
-    this.setState({receivedKeyboardData});
-  }
   render() {
     return (
-      <View style={styles.container}>
-
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          keyboardDismissMode={TrackInteractive ? 'interactive' : 'none'}
-        >
-          <Text style={styles.welcome}>{this.props.message ? this.props.message : 'Keyboards example'}</Text>
-          <Text testID={'demo-message'}>{this.state.receivedKeyboardData}</Text>
-        </ScrollView>
-
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <View style={styles.container}>
-            <Input
-              keyboardType='numeric'
-              placeholder={'dfdfdfd'}
-            />
+      <TouchableWithoutFeedback onPress={this.onReleaseKeyboard}>
+        <View style={styles.container}>
+          <View style={styles.contents}>
+            <Text onPress={this.onText}>
+              Input: {this.state.text}
+            </Text>
           </View>
-        </TouchableWithoutFeedback>
-
-        <DismissKeyboardView>
-          <TextInput
+          <Animated.View
             style={{
-              width: 120,
-              height: 20,
+              height: this.keyboardHeight,
+              opacity: this.keyboardOpacity,
             }}
-            placeholder={'123'}
-          />
-        </DismissKeyboardView>
-        <KeyboardAccessoryView
-          renderContent={this.keyboardAccessoryViewContent}
-          onHeightChanged={IsIOS ? height => this.setState({keyboardAccessoryViewHeight: height}) : undefined}
-          trackInteractive={TrackInteractive}
-          kbInputRef={this.textInputRef}
-          kbComponent={this.state.customKeyboard.component}
-          kbInitialProps={this.state.customKeyboard.initialProps}
-          onItemSelected={this.onKeyboardItemSelected}
-          onKeyboardResigned={this.onKeyboardResigned}
-          revealKeyboardInteractive
-        />
-      </View>
+          >
+            <NumberKeyboard
+              isRenderDot={true}
+              onClear={this._handleKey}
+              onDelete={this._handleKey}
+              onKeyPress={this._handleKey}
+            />
+          </Animated.View>
+        </View>
+      </TouchableWithoutFeedback>
     );
   }
 }
@@ -173,49 +104,13 @@ export default class App extends Component<Props> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
     backgroundColor: '#F5FCFF',
   },
-  scrollContainer: {
-    justifyContent: 'center',
-    padding: 15,
+  contents: {
     flex: 1,
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-    paddingTop: 50,
-    paddingBottom: 50,
-  },
-  inputContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 25,
-  },
-  blurContainer: {
-    ...Platform.select({
-      ios: {
-        flex: 1,
-      },
-    }),
-  },
-  textInput: {
-    flex: 1,
-    marginLeft: 10,
-    marginTop: 10,
-    marginBottom: 10,
-    paddingLeft: 10,
-    paddingTop: 2,
-    paddingBottom: 5,
-    fontSize: 16,
-    backgroundColor: 'white',
-    borderWidth: 0.5 / PixelRatio.get(),
-    borderRadius: 18,
-  },
-  sendButton: {
-    paddingRight: 15,
-    paddingLeft: 15,
-    alignSelf: 'center',
-  },
+    justifyContent: 'center',
+  }
 });
