@@ -11,6 +11,7 @@
     "react": "16.4.1",
     "react-native": "0.56.0",
     "react-native-fs": "^2.10.14",
+    "react-native-sound": "^0.10.9",
     "react-native-video": "^3.0.0"
   },
   "devDependencies": {
